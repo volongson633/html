@@ -3,126 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Chi Tiêu Học Sinh</title>
+    <title>Dashboard Quỹ Lớp 10A1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { background: white; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        .btn-action { transition: all 0.2s; shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .btn-action:active { transform: scale(0.9); }
+        /* Sử dụng ảnh nền từ link bạn cung cấp */
+        body { 
+            background: url('https://cdn.tgdd.vn//GameApp/1302823//anhh2-800x450.jpg') no-repeat center center fixed; 
+            background-size: cover;
+            transition: background 0.5s ease, color 0.5s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Hiệu ứng kính trong suốt (Glassmorphism) */
+        .glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 1.5rem;
+        }
+
+        /* Chế độ tối cho hiệu ứng kính */
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f1f5f9;
+        }
+
+        /* Tùy chỉnh thanh cuộn cho mục bình luận */
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+
+        .dark-toggle-btn {
+            box-shadow: 0 4px 14px 0 rgba(0,0,0,0.3);
+        }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="p-4 md:p-8 min-h-screen">
 
-    <div class="max-w-5xl mx-auto">
-        <header class="mb-10 text-center">
-            <h1 class="text-4xl font-extrabold text-slate-800 mb-2">💰 Quản Lý Chi Tiêu Lớp</h1>
-            <p class="text-slate-500 text-lg">Bình chọn các khoản chi và theo dõi ngân sách trực tuyến</p>
+    <div class="max-w-6xl mx-auto">
+        <header class="glass p-6 mb-8 flex flex-col md:flex-row justify-between items-center gap-4 shadow-2xl">
+            <div class="text-center md:text-left">
+                <h1 class="text-3xl font-black text-indigo-700 dark:text-indigo-400">🏫 10A1 SMART DASHBOARD</h1>
+                <p class="text-slate-600 dark:text-slate-400 font-medium italic">Minh bạch tài chính - Vui chơi hết mình</p>
+            </div>
+            
+            <div class="flex items-center gap-5">
+                <button onclick="toggleDarkMode()" id="modeBtn" class="dark-toggle-btn bg-slate-800 text-white dark:bg-amber-400 dark:text-slate-900 px-5 py-2.5 rounded-2xl font-bold transition-all transform hover:scale-105 active:scale-95 text-sm">
+                    🌙 Chế độ Tối
+                </button>
+                <div class="text-right">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Ngân sách hiện tại</span>
+                    <p class="text-3xl font-black text-emerald-600 drop-shadow-sm">2,500,000đ</p>
+                </div>
+            </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <div class="lg:col-span-2 card p-8">
-                <h2 class="text-2xl font-bold text-slate-700 mb-6 flex items-center">
-                    <span class="mr-2">📊</span> Tỷ lệ bình chọn hiện tại
-                </h2>
-                <div class="relative h-[350px]">
-                    <canvas id="spendingChart"></canvas>
-                </div>
-            </div>
-
-            <div class="card p-8">
-                <h2 class="text-2xl font-bold text-slate-700 mb-6">🗳️ Bình chọn</h2>
-                
-                <div id="vote-controls" class="space-y-6">
+            <div class="lg:col-span-2 space-y-8">
+                <div class="glass p-8 shadow-xl min-h-[400px]">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                        <span>📊</span> Kết quả Bình chọn trực tuyến
+                    </h2>
+                    <div class="h-64">
+                        <canvas id="votingChart"></canvas>
                     </div>
+                </div>
 
-                <div class="mt-10 pt-6 border-t border-slate-100">
-                    <p class="text-sm text-slate-400 text-center italic">
-                        Mẹo: Nhấn dấu "-" để sửa lỗi nếu bạn bấm nhầm.
-                    </p>
+                <div class="glass p-8 shadow-xl">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-indigo-600 dark:text-indigo-300">
+                        💬 Ý kiến đóng góp ẩn danh
+                    </h2>
+                    <div id="chatFeed" class="h-56 overflow-y-auto mb-6 pr-2 space-y-4 custom-scroll">
+                        <div class="bg-white/40 dark:bg-slate-800/40 p-4 rounded-2xl border-l-4 border-indigo-500">
+                            <p class="text-sm">"Mình nghĩ nên dành 20% quỹ để mua quà sinh nhật cho các bạn trong tháng."</p>
+                            <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-2 block">— Ẩn danh #001</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <input type="text" id="userInput" placeholder="Góp ý ẩn danh tại đây..." 
+                               class="flex-1 bg-white/50 dark:bg-slate-900/50 border-0 rounded-2xl px-5 py-3 outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                        <button onclick="postComment()" class="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-indigo-700 shadow-lg active:scale-95 transition-transform">
+                            Gửi
+                        </button>
+                    </div>
                 </div>
             </div>
 
+            <div class="glass p-8 shadow-xl border-b-8 border-indigo-500 h-fit">
+                <h2 class="text-xl font-bold mb-2">🗳️ Trưng cầu ý kiến</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mb-8 italic">Mọi lựa chọn đều được biểu quyết dân chủ</p>
+                
+                <div id="votingItems" class="space-y-8">
+                    </div>
+            </div>
         </div>
     </div>
 
     <script>
         // Dữ liệu ban đầu
-        const categories = [
-            { label: 'Sách tham khảo', votes: 15, color: '#3b82f6' },
-            { label: 'Dụng cụ thể thao', votes: 10, color: '#10b981' },
-            { label: 'Tiệc cuối tháng', votes: 20, color: '#f59e0b' }
+        const options = [
+            { label: 'Trà sữa cuối tuần', votes: 12, color: '#6366f1' },
+            { label: 'Mua bóng đá mới', votes: 8, color: '#10b981' },
+            { label: 'Dã ngoại công viên', votes: 5, color: '#f59e0b' }
         ];
 
-        let voteData = categories.map(c => c.votes);
-        let labels = categories.map(c => c.label);
-        let colors = categories.map(c => c.color);
-
         // Khởi tạo Biểu đồ
-        const ctx = document.getElementById('spendingChart').getContext('2d');
+        const ctx = document.getElementById('votingChart').getContext('2d');
         const myChart = new Chart(ctx, {
-            type: 'doughnut',
+            type: 'bar',
             data: {
-                labels: labels,
+                labels: options.map(o => o.label),
                 datasets: [{
-                    data: voteData,
-                    backgroundColor: colors,
-                    borderWidth: 0,
-                    hoverOffset: 20
+                    label: 'Số phiếu',
+                    data: options.map(o => o.votes),
+                    backgroundColor: options.map(o => o.color),
+                    borderRadius: 12
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { padding: 20, font: { size: 14 } } }
+                plugins: { legend: { display: false } },
+                scales: { 
+                    y: { beginAtZero: true, grid: { display: false } },
+                    x: { grid: { display: false } }
                 }
             }
         });
 
-        // Hàm Render danh sách nút bấm
-        function renderControls() {
-            const container = document.getElementById('vote-controls');
-            container.innerHTML = ''; // Xóa cũ
-
-            categories.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.className = "flex flex-col gap-2";
-                div.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <span class="font-medium text-slate-600">${item.label}</span>
-                        <div class="flex items-center bg-slate-100 rounded-lg p-1">
-                            <button onclick="changeVote(${index}, -1)" class="btn-action w-8 h-8 flex items-center justify-center bg-white rounded-md shadow-sm hover:bg-red-50 text-red-500 font-bold">-</button>
-                            <span id="v${index}" class="px-4 font-bold text-slate-800 min-w-[40px] text-center">${voteData[index]}</span>
-                            <button onclick="changeVote(${index}, 1)" class="btn-action w-8 h-8 flex items-center justify-center bg-white rounded-md shadow-sm hover:bg-green-50 text-green-500 font-bold">+</button>
+        // Vẽ danh sách nút bình chọn
+        function drawPolls() {
+            const container = document.getElementById('votingItems');
+            container.innerHTML = '';
+            options.forEach((opt, idx) => {
+                container.innerHTML += `
+                    <div class="group">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-sm tracking-tight">${opt.label}</span>
+                            <div class="flex items-center gap-2 bg-slate-200/50 dark:bg-slate-700/50 p-1 rounded-xl">
+                                <button onclick="updateVote(${idx}, -1)" class="w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-600 rounded-lg shadow-sm text-red-500 font-bold hover:bg-red-50">-</button>
+                                <span class="w-6 text-center font-black">${opt.votes}</span>
+                                <button onclick="updateVote(${idx}, 1)" class="w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-600 rounded-lg shadow-sm text-green-500 font-bold hover:bg-green-50">+</button>
+                            </div>
                         </div>
-                    </div>
-                `;
-                container.appendChild(div);
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                            <div class="h-full transition-all duration-500" style="width: ${opt.votes * 4}%; background-color: ${opt.color}"></div>
+                        </div>
+                    </div>`;
             });
         }
 
-        // Hàm xử lý tăng/giảm
-        function changeVote(index, delta) {
-            const newValue = voteData[index] + delta;
-            
-            // Chỉ cập nhật nếu giá trị mới >= 0
-            if (newValue >= 0) {
-                voteData[index] = newValue;
-                
-                // Cập nhật con số trên giao diện
-                document.getElementById(`v${index}`).innerText = newValue;
-                
-                // Cập nhật biểu đồ
-                myChart.data.datasets[0].data = voteData;
-                myChart.update('none'); // Update mượt mà không cần hiệu ứng load lại
+        function updateVote(index, amount) {
+            if (options[index].votes + amount >= 0) {
+                options[index].votes += amount;
+                myChart.data.datasets[0].data = options.map(o => o.votes);
+                myChart.update();
+                drawPolls();
             }
         }
 
-        // Chạy lần đầu
-        renderControls();
+        // Chế độ sáng tối
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('modeBtn').innerText = isDark ? "☀️ Chế độ Sáng" : "🌙 Chế độ Tối";
+        }
+
+        // Bình luận ẩn danh
+        function postComment() {
+            const input = document.getElementById('userInput');
+            const feed = document.getElementById('chatFeed');
+            if (input.value.trim()) {
+                const id = Math.floor(100 + Math.random() * 900);
+                const div = document.createElement('div');
+                div.className = "bg-white/40 dark:bg-slate-800/40 p-4 rounded-2xl border-l-4 border-indigo-500 transition-all opacity-0 translate-y-2";
+                div.innerHTML = `
+                    <p class="text-sm">"${input.value}"</p>
+                    <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-2 block">— Ẩn danh #${id}</span>
+                `;
+                feed.prepend(div);
+                setTimeout(() => { div.classList.remove('opacity-0', 'translate-y-2'); }, 10);
+                input.value = '';
+                feed.scrollTop = 0;
+            }
+        }
+
+        drawPolls();
     </script>
 </body>
 </html>
