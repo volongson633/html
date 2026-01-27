@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Hệ thống Quản lý và Xếp loại Học lực Trực tuyến">
+    <meta name="keywords" content="quản lý học lực, tính điểm trung bình, xếp loại học sinh">
+    <meta name="author" content="Hệ thống Quản lý Học lực">
+    <title>Hệ thống Quản lý Học lực Học Kỳ</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .student-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .grade-table {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #5568d3;
+        }
+
+        td {
+            padding: 8px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+
+        td:first-child {
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            background: #f8f9fa;
+            white-space: nowrap;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+
+        .avg-cell {
+            background: #f0f4ff !important;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 15px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-calculate {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-reset {
+            background: #f1f2f6;
+            color: #666;
+        }
+
+        .btn-reset:hover {
+            background: #dfe4ea;
+        }
+
+        .btn-export {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-export:hover {
+            background: #27ae60;
+        }
+
+        .btn-print {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-print:hover {
+            background: #2980b9;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result.xuat-sac {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .result.goi {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .result.kha {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .result.trung-binh {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: #333;
+        }
+
+        .result.yeu {
+            background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+            color: #333;
+        }
+
+        .result.kem {
+            background: linear-gradient(135deg, #fdcbf1 0%, #e6dee9 100%);
+            color: #666;
+        }
+
+        .result h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .result .grade {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .result .details {
+            margin-top: 15px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .error-message {
+            background: #ff4757;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .formula {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .formula strong {
+            color: #667eea;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+            
+            .buttons, .formula {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .student-info {
+                grid-template-columns: 1fr;
+            }
+            
+            th, td {
+                padding: 6px 4px;
+                font-size: 11px;
+            }
+            
+            input[type="number"] {
+                padding: 6px;
+                font-size: 12px;
+            }
+            
+            button {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+            
+            h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Hệ thống Quản lý Học lực Học Kỳ</h1>
+        <p class="subtitle">Tính điểm trung bình 12 môn học & Xếp loại học lực</p>
+
+        <div class="student-info">
+            <div class="form-group">
+                <label>Họ và tên học sinh</label>
+                <input type="text" id="studentName" placeholder="Nhập tên học sinh...">
+            </div>
+            <div class="form-group">
+                <label>Lớp</label>
+                <input type="text" id="className" placeholder="Ví dụ: 10A1, 11B2...">
+            </div>
+        </div>
+
+        <div class="formula">
+            <strong>📌 Lưu ý:</strong> 
+            • Mỗi môn: ĐTB = (TX1 + TX2 + TX3 + TX4 + GK×2 + CK×3) ÷ 9<br>
+            • Có thể bỏ trống các ô điểm không có<br>
+            • <strong>Bắt buộc nhập đủ 9 môn học</strong> để tính xếp loại học kỳ<br>
+            • Điểm trung bình học kỳ = Tổng điểm trung bình 9 môn ÷ 9
+        </div>
+
+        <div class="grade-table">
+            <table id="gradeTable">
+                <thead>
+                    <tr>
+                        <th style="width: 180px;">Môn học</th>
+                        <th style="width: 80px;">TX1</th>
+                        <th style="width: 80px;">TX2</th>
+                        <th style="width: 80px;">TX3</th>
+                        <th style="width: 80px;">TX4</th>
+                        <th style="width: 80px;">GK (×2)</th>
+                        <th style="width: 80px;">CK (×3)</th>
+                        <th style="width: 100px;">ĐTB Môn</th>
+                    </tr>
+                </thead>
+                <tbody id="gradeBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="buttons">
+            <button class="btn-calculate" onclick="calculateGrade()">📊 Tính kết quả</button>
+            <button class="btn-reset" onclick="resetForm()">🔄 Nhập lại</button>
+            <button class="btn-export" onclick="exportToFile()">📄 Xuất file</button>
+            <button class="btn-print" onclick="window.print()">🖨️ In kết quả</button>
+        </div>
+
+        <div id="result" class="result">
+            <h2 id="resultTitle"></h2>
+            <div class="grade" id="avgGrade"></div>
+            <div class="details" id="resultDetails"></div>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Hệ thống Quản lý Học lực | Phiên bản 1.0</p>
+            <p>Được phát triển để hỗ trợ giáo viên và học sinh quản lý điểm số hiệu quả</p>
+        </div>
+    </div>
+
+    <script>
+        const subjects = [
+            'Toán',
+            'Văn',
+            'Anh',
+            'Lý',
+            'Hóa',
+            'Sinh',
+            'Sử',
+            'Địa',
+            'GDCD',
+            'GDQP',
+            'Tin học',
+            'Công nghệ'
+        ];
+
+        function initTable() {
+            const tbody = document.getElementById('gradeBody');
+            tbody.innerHTML = '';
+            
+            subjects.forEach((subject, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${subject}</td>
+                    <td><input type="number" id="tx1_${index}" min="0" max="10" step="0.1" placeholder="-"></td>
+                    <td><input type="number" id="tx2_${index}" min="0" max="10" step="0.1" placeholder="-"></td>
+                    <td><input type="number" id="tx3_${index}" min="0" max="10" step="0.1" placeholder="-"></td>
+                    <td><input type="number" id="tx4_${index}" min="0" max="10" step="0.1" placeholder="-"></td>
+                    <td><input type="number" id="gk_${index}" min="0" max="10" step="0.1" placeholder="-"></td>
+                    <td><input type="number" id="ck_${index}" min="0" max="10" step="0.1" placeholder="-"></td>
+                    <td class="avg-cell" id="avg_${index}">-</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function validateScore(value) {
+            return value === '' || (value >= 0 && value <= 10);
+        }
+
+        function calculateSubjectAverage(index) {
+            const tx1 = parseFloat(document.getElementById(tx1_${index}).value) || 0;
+            const tx2 = parseFloat(document.getElementById(tx2_${index}).value) || 0;
+            const tx3 = parseFloat(document.getElementById(tx3_${index}).value) || 0;
+            const tx4 = parseFloat(document.getElementById(tx4_${index}).value) || 0;
+            const gk = parseFloat(document.getElementById(gk_${index}).value) || 0;
+            const ck = parseFloat(document.getElementById(ck_${index}).value) || 0;
+
+            if (!validateScore(tx1) || !validateScore(tx2) || !validateScore(tx3) || 
+                !validateScore(tx4) || !validateScore(gk) || !validateScore(ck)) {
+                return null;
+            }
+
+            const scores = [tx1, tx2, tx3, tx4];
+            const txCount = scores.filter(s => s > 0).length;
+            const hasGK = gk > 0;
+            const hasCK = ck > 0;
+
+            if (txCount === 0 && !hasGK && !hasCK) {
+                return null;
+            }
+
+            const txSum = scores.reduce((a, b) => a + b, 0);
+            const total = txSum + (gk * 2) + (ck * 3);
+            const average = total / 9;
+
+            return Math.round(average * 100) / 100;
+        }
+
+        function calculateGrade() {
+            const studentName = document.getElementById('studentName').value || 'Học sinh';
+            const className = document.getElementById('className').value || 'Chưa nhập';
+            const errorMsg = document.getElementById('errorMessage');
+            
+            const subjectAverages = [];
+            let validSubjects = 0;
+
+            for (let i = 0; i < subjects.length; i++) {
+                const avg = calculateSubjectAverage(i);
+                const avgCell = document.getElementById(avg_${i});
+                
+                if (avg === null) {
+                    avgCell.textContent = '-';
+                } else if (isNaN(avg)) {
+                    avgCell.textContent = 'Lỗi';
+                } else {
+                    avgCell.textContent = avg.toFixed(2);
+                    subjectAverages.push(avg);
+                    validSubjects++;
+                }
+            }
+
+            if (validSubjects < 9) {
+                errorMsg.textContent = ⚠️ Phải nhập đủ 9 môn học! Hiện tại chỉ có ${validSubjects} môn.;
+                errorMsg.classList.add('show');
+                document.getElementById('result').classList.remove('show');
+                return;
+            }
+
+            errorMsg.classList.remove('show');
+
+            const nineSubjects = subjectAverages.slice(0, 9);
+            const semesterAvg = nineSubjects.reduce((a, b) => a + b, 0) / 9;
+            const roundedSemesterAvg = Math.round(semesterAvg * 100) / 100;
+
+            const above9 = nineSubjects.filter(s => s >= 9).length;
+            const above8 = nineSubjects.filter(s => s >= 😎.length;
+            const above6_5 = nineSubjects.filter(s => s >= 6.5).length;
+            const above5 = nineSubjects.filter(s => s >= 5).length;
+            const above3_5 = nineSubjects.filter(s => s >= 3.5).length;
+            
+            const minScore = Math.min(...nineSubjects);
+
+            let classification = '';
+            let classType = '';
+            let emoji = '';
+
+            if (above9 >= 6 && minScore >= 8 && roundedSemesterAvg >= 9) {
+                classification = 'XUẤT SẮC';
+                classType = 'xuat-sac';
+                emoji = '🏆';
+            } else if (above8 >= 6 && minScore >= 6.5 && roundedSemesterAvg >= 😎 {
+                classification = 'GIỎI';
+                classType = 'goi';
+                emoji = '⭐';
+            } else if (above6_5 >= 6 && minScore >= 5 && roundedSemesterAvg >= 6.5) {
+                classification = 'KHÁ';
+                classType = 'kha';
+                emoji = '👍';
+            } else if (above5 >= 6 && minScore >= 3.5 && roundedSemesterAvg >= 5) {
+                classification = 'TRUNG BÌNH';
+                classType = 'trung-binh';
+                emoji = '📚';
+            } else if (above3_5 >= 6 && minScore >= 2 && roundedSemesterAvg >= 3.5) {
+                classification = 'YẾU';
+                classType = 'yeu';
+                emoji = '📝';
+            } else {
+                classification = 'KÉM';
+                classType = 'kem';
+                emoji = '⚠️';
+            }
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = result ${classType} show;
+            
+            document.getElementById('resultTitle').textContent = ${emoji} Kết quả học kỳ - ${studentName} - Lớp ${className};
+            document.getElementById('avgGrade').textContent = roundedSemesterAvg.toFixed(2);
+            
+            let subjectList = '';
+            for (let i = 0; i < Math.min(nineSubjects.length, 9); i++) {
+                subjectList += ${subjects[i]}: ${nineSubjects[i].toFixed(2)} | ;
+            }
+            
+            document.getElementById('resultDetails').innerHTML = `
+                <strong>Xếp loại học lực:</strong> ${classification}<br>
+                <strong>Số môn học:</strong> ${validSubjects} môn (Tính ${nineSubjects.length} môn)<br>
+                <strong>Điểm cao nhất:</strong> ${Math.max(...nineSubjects).toFixed(2)}<br>
+                <strong>Điểm thấp nhất:</strong> ${minScore.toFixed(2)}<br>
+                <strong>Điểm các môn:</strong><br>${subjectList.slice(0, -3)}
+            `;
+
+            const data = {
+                studentName,
+                className,
+                subjects: subjects.slice(0, 9),
+                averages: nineSubjects,
+                semesterAvg: roundedSemesterAvg,
+                classification,
+                date: new Date().toLocaleString('vi-VN')
+            };
+            localStorage.setItem('lastResult', JSON.stringify(data));
+        }
+
+        function resetForm() {
+            document.getElementById('studentName').value = '';
+            document.getElementById('className').value = '';
+            
+            for (let i = 0; i < subjects.length; i++) {
+                ['tx1', 'tx2', 'tx3', 'tx4', 'gk', 'ck'].forEach(type => {
+                    const input = document.getElementById(${type}_${i});
+                    if (input) input.value = '';
+                });
+                const avgCell = document.getElementById(avg_${i});
+                if (avgCell) avgCell.textContent = '-';
+            }
+            
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('errorMessage').classList.remove('show');
+        }
+
+        function exportToFile() {
+            const lastResult = localStorage.getItem('lastResult');
+            
+            if (!lastResult) {
+                alert('⚠️ Chưa có kết quả để xuất. Vui lòng tính điểm trước!');
+                return;
+            }
+
+            const data = JSON.parse(lastResult);
+            
+            let content = `
+╔══════════════════════════════════════════════════════╗
+║     HỆ THỐNG QUẢN LÝ HỌC LỰC HỌC KỲ                ║
+╚══════════════════════════════════════════════════════╝
+
+HỌC SINH: ${data.studentName}
+LỚP: ${data.className}
+NGÀY TẠO: ${data.date}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ĐIỂM TRUNG BÌNH CÁC MÔN:
+`;
+
+            data.subjects.forEach((subject, i) => {
+                content += ├─ ${subject.padEnd(20, ' ')}: ${data.averages[i].toFixed(2)}\n;
+            });
+
+            content += `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+KẾT QUẢ HỌC KỲ:
+► Điểm trung bình học kỳ: ${data.semesterAvg}
+► Xếp loại học lực: ${data.classification}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ghi chú: Kết quả được tính dựa trên 9 môn học.
+Công thức: ĐTB môn = (TX1+TX2+TX3+TX4 + GK×2 + CK×3) ÷ 9
+            `;
+
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = KetQua_HocKy_${data.studentName.replace(/\s+/g, '_')}_${Date.now()}.txt;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Đã xuất file thành công!');
+        }
+
+        window.onload = function() {
+            initTable();
+        };
+    </script>
+</body>
+</html>
